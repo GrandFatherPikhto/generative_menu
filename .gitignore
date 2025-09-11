@@ -1,0 +1,42 @@
+# CMake build artifacts
+/build/
+/out/
+# If you use a specific build directory name, like 'cmake-build-debug', add it:
+/cmake-build-debug/
+/cmake-build-release/
+
+# CMake generated files
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+install_manifest.txt
+CTestTestfile.cmake
+Makefile
+*.cbp # CodeBlocks project files
+*.sln # Visual Studio solution files
+*.vcxproj # Visual Studio project files
+*.vcxproj.filters
+*.vcxproj.user
+*.suo # Visual Studio solution user options
+*.user # Visual Studio user options
+*.opensdf # Visual Studio SDF database
+*.sdf # Visual Studio SDF database
+
+# Executables and libraries
+*.exe
+*.dll
+*.so
+*.a
+*.lib
+*.obj
+*.o
+
+# IDE specific files
+.idea/ # CLion project files
+.vscode/ # VS Code settings (if not shared)
+*.swp # Vim swap files
+*~ # Emacs backup files
+# Add other IDE-specific files as needed
+
+# Dependency management (e.g., vcpkg)
+vcpkg_installed/
