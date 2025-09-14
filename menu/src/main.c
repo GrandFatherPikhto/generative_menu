@@ -11,23 +11,29 @@ int main(void)
 
     lcd1602_init();
 
-    while(lcd1602_tick()) {
-        if (renc_state(RENC_ACTION_NEXT)) 
+     while(lcd1602_tick()) {
+        if (renc_state(RENC_ACTION_CHANGE_POSITION)) 
         {
-            // menu_next(); 
-            // menu_increment();
+            // printf("%s:%d next\n", __FILE__, __LINE__);
+            handle_change_position(renc_get_delta()); 
         }
         
-        if (renc_state(RENC_ACTION_PREV)) { 
-            // menu_prev(); 
-            // menu_decrement();
+        if (renc_state(RENC_ACTION_PUSH_BUTTON)) {
+            // printf("%s:%d push button\n", __FILE__, __LINE__);
+            handle_push_button();
         }
-        
-        // if (renc_state(RENC_ACTION_PUSH_BUTTON)) menu_enter();
-        // if (renc_state(RENC_ACTION_LONG_PUSH_BUTTON)) menu_back();
+
+        if (renc_state(RENC_ACTION_LONG_PUSH_BUTTON)) {
+            // printf("%s:%d long push button\n", __FILE__, __LINE__);
+            handle_long_push_button();
+        }
 
         if (!renc_state(RENC_ACTION_NONE)) {
             renc_reset_state();
+        }
+
+        if (menu_is_dirty()) {
+            menu_draw();
         }
 
         usleep(100);

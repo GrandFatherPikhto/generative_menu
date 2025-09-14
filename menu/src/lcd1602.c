@@ -39,7 +39,7 @@ void lcd1602_printf(const char *format, ...) {
     vsnprintf(buffer, LCD_BUFFER_SIZE, format, args);
     va_end(args);
     
-    printf("%s\n", buffer);
+    // printf("%s\n", buffer);
     lcd_sdl_print_str(s_sdl_handle, buffer);
 }
 
@@ -50,12 +50,12 @@ void lcd1602_clear()
 
 void lcd1602_set_cursor(int x, int y)
 {
-    printf("%s:%d x: %d, y: %d\n", __FILE__, __LINE__, x, y);
+    // printf("%s:%d x: %d, y: %d\n", __FILE__, __LINE__, x, y);
     lcd_sdl_set_cursor(s_sdl_handle, x, y);
 }
 
 void lcd1602_print(const char *str)
 {
     lcd_sdl_print_str(s_sdl_handle, str);
-    printf("%s:%d menu: %s\n", __FILE__, __LINE__, str);
+    // printf("%s:%d menu: %s\n", __FILE__, __LINE__, str);
 }

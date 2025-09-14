@@ -26,6 +26,7 @@ set(LIB_SOURCES
     src/lcd1602.c
     src/rotenc_menu.c
     src/rotary_encoder.c
+    src/rotenc_callback.c
     )
 
 set(EXEC_SOURCES

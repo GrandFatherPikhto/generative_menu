@@ -72,6 +72,9 @@ bool renc_state(renc_state_t state)
     case RENC_ACTION_NONE:
         return (s_handle->state == 0);
     
+    case RENC_ACTION_CHANGE_POSITION:
+        return (IS_BIT_SET(s_handle->state, ROTARY_ENCODER_CHANGE_POSITION));
+
     case RENC_ACTION_NEXT:
         return ((IS_BIT_SET(s_handle->state, ROTARY_ENCODER_CHANGE_POSITION)) 
             && s_handle->delta > 0);
