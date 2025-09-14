@@ -402,7 +402,8 @@ static menu_values_t s_menu_values = {
         .previous = MENU_ID_SETTINGS,
         .state = MENU_STATE_NAVIGATION,
         .delta = 0,
-        .event = 0,
+        .menu_event = 0,
+        .control_event = 0,
         .dirty = false
     }
 };
@@ -413,18 +414,15 @@ void s_menu_edit_value(int8_t delta);
 void s_set_menu(menu_id_t menu_id);
 void s_menu_set_state(menu_state_t state);
 void s_toggle_bool_value(void);
-void s_change_int_value(void);
-void s_change_int_factor_value(void);
-void s_change_float_value(void);
-void s_change_float_factor_value(void);
 void s_set_default_bool_value (void);
+void s_change_int_value(void);
 void s_set_default_int_value (void);
+void s_change_int_factor_value(void);
 void s_set_default_int_factor_value (void);
-void s_set_default_float_value (void);
-void s_set_default_float_factor_value (void);
 void s_next_factor_idx (void);
 void s_call_menu_event_cb(void);
 int32_t s_get_current_factor(void);
+void s_reset_state_info(void);
 
 // Реализация функций
 const menu_item_t *menu_get_config(menu_id_t id) {
@@ -454,10 +452,12 @@ void *menu_get_value_ptr(menu_id_t id) {
         return NULL;
     
     switch (config->type) {
+                
         case MENU_TYPE_ACTION_INT:
             return &values->action_int.value;
         case MENU_TYPE_ACTION_INT_FACTOR:
             return &values->action_int_factor.value;
+                
         case MENU_TYPE_ACTION_BOOL:
             return &values->action_bool.value;
         default:
@@ -466,7 +466,8 @@ void *menu_get_value_ptr(menu_id_t id) {
 }
 
 void handle_change_position(int8_t delta) {
-    s_menu_values.state_info.event |= MENU_EVENT_DELTA_CHANGED;
+    s_reset_state_info();
+    s_menu_values.state_info.control_event |= MENU_EVENT_DELTA_CHANGED;
     s_menu_values.state_info.delta = delta;
 
     switch(s_menu_values.state_info.state) {
@@ -480,23 +481,27 @@ void handle_change_position(int8_t delta) {
 }
 
 void handle_push_button(void) {
+    s_reset_state_info();
     const menu_item_t *config = menu_get_current_config();
     menu_item_values_t *values = menu_get_current_values();
-    
-    s_menu_values.state_info.event |= MENU_EVENT_BUTTON_PRESS;
+    s_menu_values.state_info.control_event |= MENU_EVENT_BUTTON_PRESS;
 
     if (s_menu_values.state_info.state == MENU_STATE_NAVIGATION) {
         if (config->first_child != MENU_ID_COUNT) {
             // Переход к ребенку
             s_set_menu(config->first_child);
-        } else if (config->type == MENU_TYPE_ACTION_BOOL ||
-                   config->type == MENU_TYPE_ACTION_INT ||
-                   config->type == MENU_TYPE_ACTION_INT_FACTOR ||
-                   config->type == MENU_TYPE_ACTION_FLOAT ||
-                   config->type == MENU_TYPE_ACTION_FLOAT_FACTOR ||
-                   config->type == MENU_TYPE_ACTION_CALLBACK) {
+        } else if (
+                
+               config->type == MENU_TYPE_ACTION_BOOL
+                
+            || config->type == MENU_TYPE_ACTION_INT
+                
+            || config->type == MENU_TYPE_ACTION_INT_FACTOR
+                
+            || config->type == MENU_TYPE_ACTION_CALLBACK
+            ) {
             // Переход в режим редактирования
-            s_menu_values.state_info.event |= MENU_EVENT_ENTER_EDIT;
+            s_menu_values.state_info.menu_event |= MENU_EVENT_ENTER_EDIT;
             s_menu_set_state(MENU_STATE_EDIT);
         }
     } else if (s_menu_values.state_info.state == MENU_STATE_EDIT) {
@@ -507,7 +512,7 @@ void handle_push_button(void) {
                 break;
                 
             case MENU_TYPE_ACTION_INT_FACTOR:
-            case MENU_TYPE_ACTION_FLOAT_FACTOR:
+            
                 s_next_factor_idx();
                 break;
             default:
@@ -517,14 +522,15 @@ void handle_push_button(void) {
 }
 
 void handle_long_push_button(void) {
+    s_reset_state_info();
     const menu_item_t *config = menu_get_current_config();
     menu_item_values_t *values = menu_get_current_values();
 
-    s_menu_values.state_info.event |= MENU_EVENT_BUTTON_LONG_PRESS;
+    s_menu_values.state_info.control_event |= MENU_EVENT_BUTTON_LONG_PRESS;
 
     if (s_menu_values.state_info.state == MENU_STATE_EDIT) {
         // Выход из режима редактирования
-        s_menu_values.state_info.event |= MENU_EVENT_EXIT_EDIT;
+        s_menu_values.state_info.menu_event |= MENU_EVENT_EXIT_EDIT;
         s_menu_set_state(MENU_STATE_NAVIGATION);
     } else {
         // Возврат к родителю
@@ -535,27 +541,25 @@ void handle_long_push_button(void) {
 }
 
 void handle_double_click_button(void) {
-    s_menu_values.state_info.event |= MENU_EVENT_BUTTON_DOUBLE_CLICK;
+    s_reset_state_info();
+    s_menu_values.state_info.control_event |= MENU_EVENT_BUTTON_DOUBLE_CLICK;
     const menu_item_t *config = menu_get_current_config();
     menu_item_values_t *values = menu_get_current_values();
 
     if (s_menu_values.state_info.state == MENU_STATE_EDIT) {
         // Сброс к значениям по умолчанию
         switch (config->type) {
+            
             case MENU_TYPE_ACTION_BOOL:
                 s_set_default_bool_value ();
                 break;
+                
             case MENU_TYPE_ACTION_INT:
                 s_set_default_int_value ();
                 break;
+                
             case MENU_TYPE_ACTION_INT_FACTOR:
                 s_set_default_int_factor_value ();
-                break;
-            case MENU_TYPE_ACTION_FLOAT:
-                s_set_default_float_value ();
-                break;
-            case MENU_TYPE_ACTION_FLOAT_FACTOR:
-                s_set_default_float_factor_value ();
                 break;
             default:
                 break;
@@ -571,25 +575,16 @@ static void s_default_menu_draw(void) {
     menu_item_values_t *values = menu_get_current_values();
 
     switch (config->type) {
+        
         case MENU_TYPE_ACTION_BOOL: {
             lcd1602_print(values->action_bool.value ? "ON " : "OFF");
         } break;
-            
         case MENU_TYPE_ACTION_INT: {
             lcd1602_printf("%d/%d", values->action_int.value, config->config.action_int.max);
         } break;
             
         case MENU_TYPE_ACTION_INT_FACTOR: {
             lcd1602_printf("%d (x%d)", values->action_int_factor.value, s_get_current_factor());
-        } break;
-
-        case MENU_TYPE_ACTION_FLOAT: {
-            lcd1602_printf("%.1f/%.1f", values->action_float.value, config->config.action_float.max);
-            break;
-        }
-            
-        case MENU_TYPE_ACTION_FLOAT_FACTOR: {
-            lcd1602_printf("%.2f (x%d)", values->action_float_factor.value, s_get_current_factor());
         } break;
             
         case MENU_TYPE_ACTION_CALLBACK:
@@ -607,7 +602,6 @@ static void s_default_menu_draw(void) {
 }
 
 void menu_draw(void) {
-
     const menu_item_t *config = menu_get_current_config();
     menu_item_values_t *values = menu_get_current_values();
 
@@ -639,7 +633,6 @@ void menu_draw(void) {
     }
 
     s_menu_values.state_info.dirty = false;
-
 }
 
 bool menu_is_dirty(void)
@@ -650,14 +643,13 @@ bool menu_is_dirty(void)
 bool menu_is_editable(void) {
     return (
         s_menu_values.state_info.state == MENU_STATE_EDIT 
-        && ((s_menu_values.state_info.event & MENU_EVENT_ENTER_EDIT) == 0)
+        && ((s_menu_values.state_info.menu_event & MENU_EVENT_ENTER_EDIT) == 0)
     );
 }
 
 void menu_set_dirty(bool dirty) {
     s_menu_values.state_info.dirty = dirty;
 }
-
 
 void s_menu_move_sibling(int8_t delta) {
     menu_id_t prev_menu_id = s_menu_values.state_info.current;
@@ -698,20 +690,21 @@ void s_menu_edit_value(int8_t delta) {
 
     // Редактирование значения
     switch (config->type) {
+        
         case MENU_TYPE_ACTION_INT:
             s_change_int_value();
             break;
+            
         case MENU_TYPE_ACTION_INT_FACTOR:
             s_change_int_factor_value ();
             break;
-        case MENU_TYPE_ACTION_FLOAT:
-            s_change_float_value();
-            break;
-        case MENU_TYPE_ACTION_FLOAT_FACTOR:
-            s_change_float_factor_value();
-            break;
+            
+            
         case MENU_TYPE_ACTION_CALLBACK:
             s_call_menu_event_cb();
+            s_menu_values.state_info.dirty = true;
+            break;
+            
         default:
             break;
     }
@@ -723,10 +716,9 @@ void s_set_menu(menu_id_t menu_id) {
 
     s_menu_values.state_info.previous = s_menu_values.state_info.current;
     s_menu_values.state_info.current = menu_id;
-    s_menu_values.state_info.event |= MENU_EVENT_ITEM_CHANGED;
+    s_menu_values.state_info.menu_event |= MENU_EVENT_ITEM_CHANGED;
     s_call_menu_event_cb ();
     s_menu_values.state_info.dirty = true;
-    s_menu_values.state_info.event = 0;
 }
 
 void s_menu_set_state(menu_state_t state) {
@@ -735,7 +727,6 @@ void s_menu_set_state(menu_state_t state) {
     s_menu_values.state_info.state = state;
     s_call_menu_event_cb();
     s_menu_values.state_info.dirty = true;
-    s_menu_values.state_info.event = 0;
 }
 
 void s_toggle_bool_value(void) {
@@ -744,11 +735,18 @@ void s_toggle_bool_value(void) {
     if (config->type != MENU_TYPE_ACTION_BOOL)
         return; 
 
-    s_menu_values.state_info.event |= MENU_EVENT_VALUE_CHANGED;
+    s_menu_values.state_info.menu_event |= MENU_EVENT_VALUE_CHANGED;
     values->action_bool.value = !values->action_bool.value;
     s_call_menu_event_cb();
     s_menu_values.state_info.dirty = true;
-    s_menu_values.state_info.event = 0;
+}
+
+void s_set_default_bool_value (void) {
+    menu_item_values_t *values = menu_get_current_values();
+    const menu_item_t *config = menu_get_current_config();
+    values->action_bool.value = config->config.action_bool.default_value;
+    s_call_menu_event_cb();
+    s_menu_values.state_info.dirty = true;
 }
 
 void s_change_int_value(void) {
@@ -758,14 +756,21 @@ void s_change_int_value(void) {
     if (config->type != MENU_TYPE_ACTION_INT)
         return; 
 
-    s_menu_values.state_info.event |= MENU_EVENT_VALUE_CHANGED;
+    s_menu_values.state_info.menu_event |= MENU_EVENT_VALUE_CHANGED;
 
     values->action_int.value += s_menu_values.state_info.delta * config->config.action_int.step;
     values->action_int.value = CLAMP(values->action_int.value,
         config->config.action_int.min, config->config.action_int.max);
     s_call_menu_event_cb();
     s_menu_values.state_info.dirty = true;
-    s_menu_values.state_info.event = 0;
+}
+
+void s_set_default_int_value (void) {
+    menu_item_values_t *values = menu_get_current_values();
+    const menu_item_t *config = menu_get_current_config();
+    values->action_int.value = config->config.action_int.default_value;
+    s_call_menu_event_cb();
+    s_menu_values.state_info.dirty = true;
 }
 
 void s_change_int_factor_value(void) {
@@ -775,7 +780,7 @@ void s_change_int_factor_value(void) {
     if (config->type != MENU_TYPE_ACTION_INT_FACTOR)
         return;
 
-    s_menu_values.state_info.event |= MENU_EVENT_VALUE_CHANGED;
+    s_menu_values.state_info.menu_event |= MENU_EVENT_VALUE_CHANGED;
 
     int32_t factor = s_get_current_factor();
 
@@ -787,64 +792,6 @@ void s_change_int_factor_value(void) {
         config->config.action_int.min, config->config.action_int.max);
     s_call_menu_event_cb();
     s_menu_values.state_info.dirty = true;
-    s_menu_values.state_info.event = 0;
-}
-
-void s_change_float_value(void) {
-    menu_item_values_t *values = menu_get_current_values();
-    const menu_item_t *config = menu_get_current_config();
-
-    if (config->type != MENU_TYPE_ACTION_BOOL)
-        return; 
-
-    s_menu_values.state_info.event |= MENU_EVENT_VALUE_CHANGED;
-
-    values->action_float.value += s_menu_values.state_info.delta * config->config.action_float.step;
-    values->action_float.value = CLAMP(values->action_float.value,
-        config->config.action_float.min, config->config.action_float.max);
-    s_call_menu_event_cb();
-    s_menu_values.state_info.dirty = true;
-    s_menu_values.state_info.event = 0;
-}
-
-void s_change_float_factor_value(void) {
-    menu_item_values_t *values = menu_get_current_values();
-    const menu_item_t *config = menu_get_current_config();
-
-    if (config->type != MENU_TYPE_ACTION_BOOL)
-        return; 
-
-    int32_t factor = s_get_current_factor();
-
-    if (!factor)
-        return;
-
-    s_menu_values.state_info.event |= MENU_EVENT_VALUE_CHANGED;
-
-    values->action_float.value += s_menu_values.state_info.delta * factor;
-    values->action_float.value = CLAMP(values->action_float.value,
-        config->config.action_float.min, config->config.action_float.max);
-    s_call_menu_event_cb();
-    s_menu_values.state_info.dirty = true;
-    s_menu_values.state_info.event = 0;
-}
-
-void s_set_default_bool_value (void) {
-    menu_item_values_t *values = menu_get_current_values();
-    const menu_item_t *config = menu_get_current_config();
-    values->action_bool.value = config->config.action_bool.default_value;
-    s_call_menu_event_cb();
-    s_menu_values.state_info.dirty = true;
-    s_menu_values.state_info.event = 0;
-}
-
-void s_set_default_int_value (void) {
-    menu_item_values_t *values = menu_get_current_values();
-    const menu_item_t *config = menu_get_current_config();
-    values->action_int.value = config->config.action_int.default_value;
-    s_call_menu_event_cb();
-    s_menu_values.state_info.dirty = true;
-    s_menu_values.state_info.event = 0;
 }
 
 void s_set_default_int_factor_value (void) {
@@ -853,26 +800,10 @@ void s_set_default_int_factor_value (void) {
     values->action_int_factor.value = config->config.action_int_factor.default_value;
     s_call_menu_event_cb();
     s_menu_values.state_info.dirty = true;
-    s_menu_values.state_info.event = 0;
 }
 
-void s_set_default_float_value (void) {
-    menu_item_values_t *values = menu_get_current_values();
-    const menu_item_t *config = menu_get_current_config();
-    values->action_float.value = config->config.action_float.default_value;
-    s_call_menu_event_cb();
-    s_menu_values.state_info.dirty = true;
-    s_menu_values.state_info.event = 0;
-}
 
-void s_set_default_float_factor_value (void) {
-    menu_item_values_t *values = menu_get_current_values();
-    const menu_item_t *config = menu_get_current_config();
-    values->action_float_factor.value = config->config.action_float_factor.default_value;
-    s_call_menu_event_cb();
-    s_menu_values.state_info.dirty = true;
-    s_menu_values.state_info.event = 0;
-}
+
 
 void s_next_factor_idx (void) {
     menu_item_values_t *values = menu_get_current_values();
@@ -883,16 +814,13 @@ void s_next_factor_idx (void) {
                 (values->action_int_factor.factor_idx + 1) %
                 config->config.action_int_factor.factor.count;
             break;
-        case MENU_TYPE_ACTION_FLOAT_FACTOR:
-            values->action_float_factor.factor_idx =
-                (values->action_float_factor.factor_idx + 1) %
-                config->config.action_float_factor.factor.count;
-            break;
+            
         default:
             break;
     }
+    s_menu_values.state_info.menu_event |= MENU_EVENT_FACTOR_CHANGED;
+    s_call_menu_event_cb();
     s_menu_values.state_info.dirty = true;
-    s_menu_values.state_info.event = 0;
 }
 
 int32_t s_get_current_factor(void) {
@@ -900,12 +828,9 @@ int32_t s_get_current_factor(void) {
     const menu_item_t *config = menu_get_current_config();
 
     switch(config->type) {
+        
         case MENU_TYPE_ACTION_INT_FACTOR:
             return config->config.action_int_factor.factor.factors[values->action_int_factor.factor_idx];
-
-        case MENU_TYPE_ACTION_FLOAT_FACTOR:
-            return config->config.action_float_factor.factor.factors[values->action_float_factor.factor_idx];
-
         default:
             return 0;
     }
@@ -917,5 +842,11 @@ void s_call_menu_event_cb(void) {
     if (s_menu_event_cb) {
         s_menu_event_cb(&s_menu_values.state_info, menu_get_current_values());
     }
-    s_menu_values.state_info.event = 0;
+    s_reset_state_info();
+}
+
+void s_reset_state_info(void) {
+    s_menu_values.state_info.menu_event = 0;
+    s_menu_values.state_info.control_event = 0;
+    s_menu_values.state_info.delta = 0;
 }

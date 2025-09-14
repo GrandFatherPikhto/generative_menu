@@ -10,11 +10,15 @@ typedef enum {
     MENU_EVENT_VALUE_CHANGED       = 0x02,
     MENU_EVENT_ENTER_EDIT          = 0x04,
     MENU_EVENT_EXIT_EDIT           = 0x08,
-    MENU_EVENT_DELTA_CHANGED       = 0x10,
-    MENU_EVENT_BUTTON_PRESS        = 0x20,
-    MENU_EVENT_BUTTON_LONG_PRESS   = 0x40,
-    MENU_EVENT_BUTTON_DOUBLE_CLICK = 0x80
+    MENU_EVENT_FACTOR_CHANGED      = 0x10
 } menu_event_flags_t;
+
+typedef enum {
+    MENU_EVENT_DELTA_CHANGED       = 0x01,
+    MENU_EVENT_BUTTON_PRESS        = 0x02,
+    MENU_EVENT_BUTTON_LONG_PRESS   = 0x04,
+    MENU_EVENT_BUTTON_DOUBLE_CLICK = 0x08
+} control_events_t;
 
 typedef struct menu_data {
     union {
@@ -192,7 +196,8 @@ typedef struct {
     menu_id_t current;
     menu_id_t previous;
     menu_state_t state;
-    uint8_t event;
+    uint8_t menu_event;
+    uint8_t control_event;
     int8_t delta;
     bool dirty;
 } menu_state_info_t;

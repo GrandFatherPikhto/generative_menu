@@ -70,7 +70,7 @@ void collback_menu_event(menu_state_info_t *state, menu_item_values_t *value) {
     switch (state->current)
     {
     case MENU_ID_PWM_FREQUENCY:
-        if (menu_is_editable())
+        if (state->state == MENU_STATE_EDIT)
             s_pwm_change(state->delta);
         break;
     
@@ -83,9 +83,12 @@ const char *collback_display_str(menu_id_t menu_id) {
     switch (menu_id)
     {
     case MENU_ID_PWM_FREQUENCY:
-        printf("Menu %d, frequency_idx: %u\n", menu_id, s_context.frequency_idx);
+        // printf("Menu %d, frequency_idx: %u\n", menu_id, s_context.frequency_idx);
         return s_pwm_display();        
-
+    case MENU_ID_INFO:
+        return "SPG Info";
+    case MENU_ID_VERSION:
+        return "v1.0.0";
     default:
         return 0;
     }
@@ -95,7 +98,7 @@ const char *collback_display_str(menu_id_t menu_id) {
 
 const char *s_pwm_display(void) {
     int32_t frequency = s_frequencies[s_context.frequency_idx].frequency;
-    printf("Frequency_idx: %u, Frequency: %d\n", s_context.frequency_idx, frequency);
+    // printf("Frequency_idx: %u, Frequency: %d\n", s_context.frequency_idx, frequency);
     if (frequency < 1000)
         snprintf(s_context.str, STR_LEN, "%u", frequency);
     else if (frequency >= 1000 && frequency < 100000)
@@ -109,14 +112,7 @@ const char *s_pwm_display(void) {
 static void s_pwm_change(int8_t delta) {
     uint8_t size = sizeof(s_frequencies) / sizeof(frequency_t);
     s_context.frequency_idx = CLAMP(s_context.frequency_idx + delta, 0, size - 1);
-    printf("%s:%d idx: %u, freq: %d\n", __FILE__, __LINE__, s_context.frequency_idx, s_frequencies[s_context.frequency_idx].frequency);
+    // printf("%s:%d idx: %u, freq: %d\n", __FILE__, __LINE__, s_context.frequency_idx, s_frequencies[s_context.frequency_idx].frequency);
     menu_set_dirty(true);
 }
 
-const char * callback_info_display(void) {
-    return "Display";
-}
-
-void callback_info_change(int8_t delta) {
-
-}
