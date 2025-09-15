@@ -18,7 +18,7 @@ typedef enum {
     MENU_EVENT_BUTTON_PRESS        = 0x02,
     MENU_EVENT_BUTTON_LONG_PRESS   = 0x04,
     MENU_EVENT_BUTTON_DOUBLE_CLICK = 0x08
-} control_events_t;
+} control_events_flag_t;
 
 typedef struct menu_data {
     union {
@@ -52,13 +52,21 @@ typedef enum {
     MENU_TYPE_ACTION_INT_FACTOR = 4,
     MENU_TYPE_ACTION_FLOAT = 5,
     MENU_TYPE_ACTION_FLOAT_FACTOR = 6,
-    MENU_TYPE_ACTION_CALLBACK = 7,
+    MENU_TYPE_ACTION_FIXED_INT = 7,
+    MENU_TYPE_ACTION_FIXED_FLOAT = 8,
+    MENU_TYPE_ACTION_FIXED_STRING = 9,
+    MENU_TYPE_ACTION_CALLBACK = 10,
     MENU_TYPE_COUNT
 } menu_type_t;
 
 // ID элементов меню
 typedef enum {
     MENU_ID_ROOT,
+    MENU_ID_INFO,
+    MENU_ID_VERSION,
+    MENU_ID_START,
+    MENU_ID_REGIME,
+    MENU_ID_DELIMITERS,
     MENU_ID_SETTINGS,
     MENU_ID_PWM_FREQUENCY,
     MENU_ID_HI_CHANNEL,
@@ -71,18 +79,18 @@ typedef enum {
     MENU_ID_LO_DURATION,
     MENU_ID_LO_PWM_ON,
     MENU_ID_LO_DUTY,
-    MENU_ID_INFO,
-    MENU_ID_VERSION,
-    MENU_ID_START,
     MENU_ID_COUNT
 } menu_id_t;
 
 typedef struct {
-    uint8_t index;
     uint8_t default_idx;
     uint8_t count;
     const int32_t *factors;
 } factor_t;
+
+typedef struct {
+    bool default_value;
+} action_bool_config_t;
 
 // Структуры для НЕИЗМЕНЯЕМЫХ данных конфигурации
 typedef struct {
@@ -99,53 +107,31 @@ typedef struct {
     factor_t factor;
 } action_int_factor_config_t;
 
-typedef struct {
-    float min;
-    float max;
-    float default_value;
-    float step;
-} action_float_config_t;
 
-typedef struct {
-    float min;
-    float max;
-    float default_value;
-    factor_t factor;
-} action_float_factor_config_t;
-
-typedef struct {
-    bool default_value;
-} action_bool_config_t;
-
-/*
-typedef struct {
-    uint16_t value_id;
-    uint16_t default_value_id;
-    uint16_t counter;
-    const int32_t *values;
-} action_fixed_int_values_config_t;
 
 typedef struct {
     uint16_t value_id;
-    uint16_t default_value_id;
+    uint16_t default_idx;
     uint16_t counter;
-    const int32_t *values;
-} action_fixed_float_values_config_t;
+    const int32_t *massif;
+} action_fixed_int_config_t;
+
 
 typedef struct {
-    uint8_t default_value_id;
+    uint8_t default_idx;
     uint8_t counter;
-    const char *strings;    
-    const uint8_t *values;
-} action_fixed_strings_config_t;
-*/
+    const char **massif;   
+    const uint8_t *ids;
+} action_fixed_string_config_t;
 
 typedef union {
     action_bool_config_t action_bool;
+    
     action_int_config_t action_int;
+    
     action_int_factor_config_t action_int_factor;
-    action_float_config_t action_float;
-    action_float_factor_config_t action_float_factor;
+    action_fixed_int_config_t action_fixed_int;
+    action_fixed_string_config_t action_fixed_string;
 } menu_item_config_t;
 
 typedef struct {
@@ -163,33 +149,30 @@ typedef struct {
 
 // Структуры для ИЗМЕНЯЕМЫХ данных значений
 typedef struct {
+    bool value;
+} action_bool_values_t;
+typedef struct {
     int32_t value;
 } action_int_values_t;
-
 typedef struct {
     int32_t value;
     uint8_t factor_idx;
 } action_int_factor_values_t;
-
 typedef struct {
-    bool value;
-} action_bool_values_t;
-
+    uint8_t value_idx;
+} action_fixed_int_values_t;
 typedef struct {
-    float value;
-} action_float_values_t;
-
-typedef struct {
-    float value;
-    uint8_t factor_idx;
-} action_float_factor_values_t;
-
+    uint8_t value_idx;
+} action_fixed_string_values_t;
 typedef union {
+    
     action_bool_values_t action_bool;
     action_int_values_t action_int;
+    
     action_int_factor_values_t action_int_factor;
-    action_float_values_t action_float;
-    action_float_factor_values_t action_float_factor;
+    
+    action_fixed_int_values_t action_fixed_int;
+    action_fixed_string_values_t action_fixed_string;
 } menu_item_values_t;
 
 typedef struct {
