@@ -1,0 +1,37 @@
+#ifndef MENU_VALUES_H
+#define MENU_VALUES_H
+
+#include <stdint.h>
+#include <stdbool.h>
+
+#include "menu_struct.h"
+
+typedef struct stub_value_t {} stub_value_t;
+typedef struct {
+    uint8_t idx;
+} string_fixed_value_t;
+typedef struct {
+    void *value_ptr;
+} callback_callback_value_t;
+typedef struct {
+    uint8_t idx;
+    uint32_t value;
+} udword_factor_value_t;
+typedef struct {
+    uint8_t value;
+} ubyte_simple_value_t;
+
+typedef struct menu_value {
+    menu_id_t id;
+    union {
+        stub_value_t stub_value;
+        string_fixed_value_t string_fixed;
+        callback_callback_value_t callback_callback;
+        udword_factor_value_t udword_factor;
+        ubyte_simple_value_t ubyte_simple;
+    } data;
+} menu_item_value_t;
+
+menu_item_value_t *menu_get_value(menu_id_t id);
+
+#endif // MENU_VALUES_H

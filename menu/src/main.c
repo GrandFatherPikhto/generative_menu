@@ -15,7 +15,7 @@ int main(void)
         if (renc_state(RENC_ACTION_CHANGE_POSITION)) 
         {
             // printf("%s:%d next\n", __FILE__, __LINE__);
-            handle_change_position(renc_get_delta()); 
+            handle_change_position(renc_get_delta());
         }
         
         if (renc_state(RENC_ACTION_PUSH_BUTTON)) {
