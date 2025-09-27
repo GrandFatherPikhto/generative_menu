@@ -1,11 +1,6 @@
 cmake_minimum_required(VERSION 3.5.0)
 
-project(Menu VERSION 0.1.0 LANGUAGES C)
-
-set(PROJECT_NAME menu)
-
-set(EXEC_NAME ${PROJECT_NAME})
-set(LIB_NAME ${PROJECT_NAME}_lib)
+project(MenuWork VERSION 0.1.0 LANGUAGES C)
 
 set(LCD1602_DIR "/home/yevst/Projects/CCPP/lcd1602sdl02sym/cmake")
 
@@ -23,30 +18,33 @@ find_package(SDL2_ttf REQUIRED)
 find_package(LCD1602 REQUIRED)
 
 set(LIB_SOURCES 
-    src/menu_struct.c
+    src/menu_tree.c
     src/menu_config.c
     src/menu_values.c
-    src/menu_navigate.c
+    src/menu_context.c
+    src/menu_edit.c
+    src/menu_draw.c
     src/menu_engine.c
+    src/menu_navigate.c
     )
 
 set(INCLUDE_DIRECTORIES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/include
 )
 
-add_library(${LIB_NAME}
+add_library(${PROJECT_NAME}
     ${LIB_SOURCES}
     ${INCLUDES}
 )    
 
-target_include_directories(${LIB_NAME} PRIVATE 
+target_include_directories(${PROJECT_NAME} PRIVATE 
     ${INCLUDE_DIRECTORIES}
     ${SDL2_INCLUDE_DIRS}
     ${LCD1602_INCLUDE_DIRS}
     ${LIB_LCD1602SDL_INCLUDE}
 )
 
-set_target_properties(${LIB_NAME} PROPERTIES
+set_target_properties(${PROJECT_NAME} PROPERTIES
     VERSION 1.0
     SOVERSION 1
 )

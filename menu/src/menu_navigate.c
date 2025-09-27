@@ -4,63 +4,71 @@
 
 typedef struct menu_navigate_context {
     menu_id_t current;
-    menu_id_t prev;
+    menu_id_t prev;    
 } menu_navigate_context_t;
 
 static menu_navigate_context_t s_context = {
     .current = MENU_ID_START,
-    .prev = MENU_ID_COUNT
+    .prev = MENU_ID_COUNT,
 };
 
 // Статические функции
 static menu_id_t s_navigate_menu(menu_id_t start_id, int8_t steps, bool backward);
 
-void menu_navigate_sibling(int8_t delta) {
+void menu_navigate_sibling(menu_id_t id, int8_t delta) {
     if (delta == 0) return;
     
     bool is_back = delta > 0;
     int8_t steps = is_back ? delta : -delta;
     
-    menu_id_t target_id = s_navigate_menu(s_context.current, steps, is_back);
+    menu_id_t target_id = s_navigate_menu(id, steps, is_back);
     
-    if (target_id != s_context.current) {
-        menu_navigate_to(target_id);
+    return target_id;
+}
+
+menu_id_t menu_navigate_child(menu_id_t id) {
+    menu_id_t target_id = menu_get_child(id);
+    if (target_id == MENU_ID_COUNT)
+        return MENU_ID_COUNT;
+    return target_id;
+}
+
+menu_id_t menu_navigate_parent(menu_id_t id) {
+    menu_id_t target_id = menu_get_parent(id);
+    if (target_id == MENU_ID_COUNT)
+        return MENU_ID_COUNT;
+    return target_id;
+}
+
+// Статические функции
+static menu_id_t s_navigate_menu(menu_id_t start_id, int8_t steps, bool backward) {
+    menu_id_t current_id = start_id;
+    
+    for (int8_t i = 0; i < steps; i++) {
+        menu_id_t next_id = backward ? menu_get_prev(current_id) : menu_get_next(current_id);
+        
+        if (next_id == MENU_ID_COUNT) {
+            return current_id; // Останавливаемся на последнем валидном пункте
+        }
+        current_id = next_id;
     }
-}
-
-void menu_navigate_child(void) {
-    menu_id_t target_id = menu_get_child(s_context.current);
-    if (target_id == MENU_ID_COUNT)
-        return;
-    void menu_navigate_to(target_id);
-}
-
-void menu_navigate_parent(void) {
-    menu_id_t target_id = menu_get_parent(s_context.current);
-    if (target_id == MENU_ID_COUNT)
-        return;
-    menu_navigate_to(target_id);
+    return current_id;
 }
 
 void menu_navigate_to(menu_id_t id) {
     if (id >= MENU_ID_COUNT)
+        return;
+    if (id == s_context.current)
         return;
     s_context.prev = s_context.current;
     s_context.current = id;
     menu_update(s_context.current);
 }
 
-// Статические функции
-static menu_id_t s_navigate_menu(menu_id_t start_id, int8_t steps, bool backward) {
-    menu_id_t current = start_id;
-    
-    for (int8_t i = 0; i < steps; i++) {
-        menu_id_t next_id = backward ? menu_get_prev(current) : menu_get_next(current);
-        
-        if (next_id == MENU_ID_COUNT) {
-            return current; // Останавливаемся на последнем валидном пункте
-        }
-        current = next_id;
-    }
-    return current;
+menu_id_t menu_get_current(void) {
+    return s_context.current;
+}
+
+menu_id_t menu_get_prev(void) {
+    return s_context.prev;
 }

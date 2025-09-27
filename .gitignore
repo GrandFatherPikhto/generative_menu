@@ -40,3 +40,6 @@ Makefile
 
 # Dependency management (e.g., vcpkg)
 vcpkg_installed/
+
+/menu_rotenc/
+/menu_rotenc/**

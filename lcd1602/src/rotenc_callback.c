@@ -1,5 +1,4 @@
 #include "rotenc_callback.h"
-#include "rotenc_menu.h"
 
 #include <string.h>
 #include <stdio.h>
