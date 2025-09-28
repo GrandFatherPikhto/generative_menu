@@ -60,7 +60,7 @@ typedef struct {
 static rotenc_data_context_t s_context = {0};
 
 void rotenc_hi_duty_changed(menu_context_t *ctx, menu_id_t id, menu_event_t event) {
-    printf("%s:%d %d changed, evt %d\n", __FILE__, __LINE__, id, event);
+    printf("%s:%d %d changed, event: %d\n", __FILE__, __LINE__, id, event);
 }
 
 void pwm_frequency_display_cb(menu_context_t *ctx, menu_id_t id) {

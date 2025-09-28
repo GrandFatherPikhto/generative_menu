@@ -28,6 +28,7 @@ set(LIB_SOURCES
 
 set(EXEC_SOURCES
     src/main.c
+    src/menu_data.c
 )
 
 set(INCLUDE_DIRECTORIES
@@ -51,7 +52,6 @@ target_link_libraries(${EXEC_NAME} PRIVATE
     # ${LIB_NAME}
     LCD1602::LCD1602
     MenuWork
-    MenuData
 )
 
 message("Menu Work Includes: ${MenuWork}")

@@ -37,6 +37,19 @@ bool menu_draw_update(menu_context_t *ctx, menu_id_t id) {
     return ctx->invalidate;
 }
 
+void menu_draw_value_edit_sign(menu_context_t *ctx, menu_id_t id) {
+    for (uint8_t i = 0; i < 15; i++) {
+        if (ctx->value_buf[i] == 0) {
+            ctx->value_buf[i] = 0x20;
+        }
+    }
+    if (ctx->state == MENU_STATE_EDIT) {
+        ctx->value_buf[15] = '*';
+    } else {
+        ctx->value_buf[15] = '>';
+    }
+}
+
 /**
  * Это автогененируемые функции. Имеет смысл приводить их имена к виду menu_draw_...?
  */

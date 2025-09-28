@@ -44,11 +44,9 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${LCD1602_INCLUDE_DIRS}
     ${LIB_LCD1602SDL_INCLUDE}
     "../lcd1602/src/include"
-    "../menu_data/src/include"
 )
-target_link_libraries(${PROJECT_NAME} PRIVATE
-    MenuData
-)
+
+# target_link_libraries(${PROJECT_NAME} PRIVATE)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
     VERSION 1.0

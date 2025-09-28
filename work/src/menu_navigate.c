@@ -15,6 +15,9 @@ void menu_navigate_handle_position(menu_context_t *ctx, menu_id_t id, int8_t del
         menu_navigate_go_to(ctx, sibling_id);
     } else if (ctx->state == MENU_STATE_EDIT && ctx->configs[id].position_cb != 0) {
         ctx->configs[id].position_cb(ctx, id, delta);
+        if (ctx->configs[id].handle_event_cb != 0) {
+            ctx->configs[id].handle_event_cb(ctx, id, MENU_EVENT_CHANGE_VALUE);
+        }
     }
 }
 
@@ -25,17 +28,20 @@ void menu_navigate_handle_enter(menu_context_t *ctx, menu_id_t id) {
     const menu_node_t *node = &(ctx->nodes[id]);
     if (config == 0 || node == 0)
         return;
-    printf("[%s]\t%s:%d id = %s/%s, state = %d\n", __FUNCTION__, __FILE__, __LINE__, menu_types_get_name(id), menu_types_get_name(node->child), ctx->state);
+    // printf("[%s]\t%s:%d id = %s/%s, state = %d\n", __FUNCTION__, __FILE__, __LINE__, menu_types_get_name(id), menu_types_get_name(node->child), ctx->state);
 
     if (node->child == MENU_ID_COUNT) {
         if (ctx->state == MENU_STATE_NAVIGATION) {
             ctx->state = MENU_STATE_EDIT;
             ctx->dirty = true;
+            if(ctx->configs[id].handle_event_cb != 0) {
+                ctx->configs[id].handle_event_cb(ctx, id, MENU_EVENT_START_EDIT);
+            }
         } else if (ctx->state == MENU_STATE_EDIT && ctx->configs[id].click_cb != 0) {
             ctx->configs[id].click_cb(ctx, id);
             ctx->dirty = true;
         }
-        printf("[%s]\t%s:%d id = %s/%s, state = %d\n", __FUNCTION__, __FILE__, __LINE__, menu_types_get_name(id), menu_types_get_name(node->child), ctx->state);
+        // printf("[%s]\t%s:%d id = %s/%s, state = %d\n", __FUNCTION__, __FILE__, __LINE__, menu_types_get_name(id), menu_types_get_name(node->child), ctx->state);
     } else {
         menu_id_t target_id = node->child;
         if (target_id != MENU_ID_COUNT)
@@ -56,6 +62,9 @@ void menu_navigate_handle_back(menu_context_t *ctx, menu_id_t id) {
         if (ctx->state == MENU_STATE_EDIT) {
             ctx->state = MENU_STATE_NAVIGATION;
             ctx->dirty = true;
+            if(ctx->configs[id].handle_event_cb != 0) {
+                ctx->configs[id].handle_event_cb(ctx, id, MENU_EVENT_STOP_EDIT);
+            }
         } else if (ctx->state == MENU_STATE_NAVIGATION) {
             menu_id_t target_id = node->parent;
             if (target_id != MENU_ID_COUNT)
@@ -70,8 +79,17 @@ void menu_navigate_go_to(menu_context_t *ctx, menu_id_t id) {
     if (id == ctx->current)
         return;
 
+    if (ctx->configs[ctx->current].handle_event_cb != 0) {
+        ctx->configs[ctx->current].handle_event_cb(ctx, ctx->current, MENU_EVENT_UNFOCUSED);
+    }
+
     ctx->previous = ctx->current;
     ctx->current = id;
+
+    if (ctx->configs[ctx->current].handle_event_cb != 0) {
+        ctx->configs[ctx->current].handle_event_cb(ctx, ctx->current, MENU_EVENT_FOCUSED);
+    }
+
     ctx->dirty = true;
 }
 
