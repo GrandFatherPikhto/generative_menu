@@ -1,10 +1,10 @@
-#ifndef MENU_VALUES_H
-#define MENU_VALUES_H
+#ifndef MENU_VALUE_H
+#define MENU_VALUE_H
 
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "menu_common.h"
+#include "menu_types.h"
 
 typedef struct stub_value_t {} stub_value_t;
 typedef struct {
@@ -32,7 +32,7 @@ typedef struct s_menu_node_value_t {
     } data;
 } menu_node_value_t;
 
-menu_node_value_t *menu_values_get_node(menu_id_t id);
-menu_node_value_t *menu_values_get_nodes(void);
+menu_node_value_t *menu_value_get_node(menu_id_t id);
+menu_node_value_t *menu_value_get_nodes(void);
 
-#endif // MENU_VALUES_H
+#endif // MENU_VALUE_H

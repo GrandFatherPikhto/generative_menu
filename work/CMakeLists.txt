@@ -18,13 +18,14 @@ find_package(SDL2_ttf REQUIRED)
 find_package(LCD1602 REQUIRED)
 
 set(LIB_SOURCES 
+    src/menu_types.c
+    src/menu_handle.c
     src/menu_tree.c
     src/menu_config.c
-    src/menu_values.c
+    src/menu_value.c
     src/menu_context.c
     src/menu_edit.c
     src/menu_draw.c
-    src/menu_engine.c
     src/menu_navigate.c
     )
 
@@ -42,6 +43,11 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${SDL2_INCLUDE_DIRS}
     ${LCD1602_INCLUDE_DIRS}
     ${LIB_LCD1602SDL_INCLUDE}
+    "../lcd1602/src/include"
+    "../menu_data/src/include"
+)
+target_link_libraries(${PROJECT_NAME} PRIVATE
+    MenuData
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES

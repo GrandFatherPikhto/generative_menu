@@ -1,4 +1,4 @@
-#include "menu_values.h"
+#include "menu_value.h"
 
 static menu_node_value_t s_menu_node_values[] = {
     // start fixed
@@ -91,12 +91,12 @@ static menu_node_value_t s_menu_node_values[] = {
     },
 };
 
-menu_node_value_t *menu_values_get_node(menu_id_t id) {
+menu_node_value_t *menu_value_get_node(menu_id_t id) {
     if (id >= MENU_ID_COUNT)
         return 0;
     return &(s_menu_node_values[id]);
 }
 
-menu_node_value_t *menu_values_get_nodes(void) {
+menu_node_value_t *menu_value_get_nodes(void) {
     return s_menu_node_values;
 }

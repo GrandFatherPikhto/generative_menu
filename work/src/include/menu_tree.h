@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "menu_common.h"
+#include "menu_types.h"
 
 #define MENU_TITLE_LEN 0x10
 

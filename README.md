@@ -77,7 +77,7 @@ void menu_draw_string_fixed_value_cb(menu_context_t *ctx, menu_id_t id);
 void menu_draw_string_fixed_value(menu_context_t *ctx, menu_id_t id);
 ```
 
-### 6. **menu_common.h - вынеси типы в отдельный файл**
+### 6. **menu_types.h - вынеси типы в отдельный файл**
 Создай `menu_types.h` для чистых типов данных:
 
 ```c
@@ -157,14 +157,14 @@ menu_values.h/c     // Значения (генерируется)
 5. В menu_engine.c в функции menu_engine_handle_enter есть проверка if (config == 0 || node == 0). Но мы получаем указатели на элементы массива, они не могут быть NULL, если индекс корректен. Проверка на индекс уже есть в начале функции. Можно убрать эти проверки.
 6. В menu_draw.c в функции menu_draw_update мы проверяем ctx->dirty и выходим, если false. Но затем мы сбрасываем dirty в false после отрисовки. Однако эта функция вызывается из menu_navigate_update, которая уже проверяет dirty. Возможно, дублирование проверки не нужно.
 7. В menu_context.c функция menu_context_init возвращает const menu_context_t *, но мы можем захотеть изменять контекст. Лучше возвращать указатель без const.
-8. В menu_common.h мы объявили menu_items как static, что ограничивает его видимость одним файлом. Если он нужен в других файлах, нужно убрать static и объявить extern.
+8. В menu_types.h мы объявили menu_items как static, что ограничивает его видимость одним файлом. Если он нужен в других файлах, нужно убрать static и объявить extern.
 9. В menu_engine.h название файла guard не соответствует имени файла. Вместо MENU_H должно быть MENU_ENGINE_H.
 10. В menu_navigate.c мы включаем menu_engine.h и menu_draw.h, но не используем их напрямую. Нужно проверить, что все необходимые заголовки включены.
 11. В main.c мы определяем функцию menu_draw, которая зависит от глобального контекста. Лучше сделать ее независимой, передавая контекст.
 12. В menu_config.c мы используем функции из menu_edit.h и menu_draw.h, но не включаем их. Нужно включить.
 13. В menu_edit.c мы включаем menu_engine.h, но не используем его. Можно убрать.
 14. В menu_engine.c мы включаем menu_draw.h, но не используем его. Можно убрать.
-15. В menu_draw.c мы включаем menu_common.h, menu_context.h, menu_config.h, menu_values.h, menu_tree.h. Но в menu_draw.h мы уже включаем menu_common.h. Нужно проверить, что все зависимости удовлетворены.
+15. В menu_draw.c мы включаем menu_types.h, menu_context.h, menu_config.h, menu_values.h, menu_tree.h. Но в menu_draw.h мы уже включаем menu_types.h. Нужно проверить, что все зависимости удовлетворены.
 16. В menu_context.h мы объявили menu_context_t с полем event, но не используем его. Если не используется, можно удалить.
 17. В menu_engine.c в функции menu_engine_handle_enter и menu_engine_handle_out мы проверяем, что node->child или node->parent не равны MENU_ID_COUNT. Это правильно, но можно добавить проверку, что мы не выходим за пределы дерева.
 18. В menu_engine.c в функции menu_engine_get_sibling мы проходим по списку siblings. Но если шагов больше, чем элементов, мы можем зациклиться? Нет, потому что мы останавливаемся, когда next_id == MENU_ID_COUNT. Это правильно.

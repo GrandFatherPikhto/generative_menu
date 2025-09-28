@@ -4,9 +4,7 @@
 #include <signal.h>
 #include <execinfo.h>
 
-#include "menu_navigate.h"
-#include "menu_engine.h"
-#include "menu_context.h"
+#include "menu_handle.h"
 
 typedef struct s_rotary_encoder_t {
     int position;
@@ -39,46 +37,40 @@ void on_position_change(int new_pos) {
 
     printf("Position changed: %d/%d\n", s_rotary_encoder.delta, s_rotary_encoder.position);
     // Здесь обновляем меню или что-то еще
-    menu_navigate_position(s_rotary_encoder.delta);
+    menu_handle_position(s_rotary_encoder.delta);
 }
 
 void on_push_button() {
     printf("Button pushed\n");
     // Обработка короткого нажатия
-    menu_navigate_enter();
+    menu_handle_enter();
 }
 
 void on_long_push_button() {
     printf("Long button push\n");
     // Обработка длинного нажатия
-    menu_navigate_out();
+    menu_handle_back();
 }
 
 void on_double_click() {
     printf("Double click\n");
     // Обработка двойного нажатия
-}
-
-bool menu_is_dirty(void) {
-    return true;
+    menu_handle_reset();
 }
 
 void menu_draw(sdl_handle_t *lcd) {
-    printf("%s\r\n", menu_context_get_title_str());
-    printf("%s\r\n", menu_context_get_value_str());
     lcd_sdl_clear(lcd);
     lcd_sdl_set_cursor(lcd, 0, 0);
-    lcd_sdl_print_str(lcd, menu_context_get_title_str());
+    lcd_sdl_print_str(lcd, menu_get_display_title());
     lcd_sdl_set_cursor(lcd, 0, 1);
-    lcd_sdl_print_str(lcd, menu_context_get_value_str());
-    menu_context_reset_invalidate();
+    lcd_sdl_print_str(lcd, menu_get_display_value());
 }
 
 int main() {
     signal(SIGSEGV, signal_handler);
     signal(SIGABRT, signal_handler);
 
-    menu_context_init();
+    menu_init();
 
     // Создаем экземпляр симулятора
     sdl_handle_t *lcd = lcd1602_sdl_create("LCD1602 Simulator", 360, 150);
@@ -100,9 +92,10 @@ int main() {
     while (lcd1602_sdl_next_tick(lcd)) {
         // Здесь может быть ваша логика, например, обновление меню
         // Но важно не блокировать надолго, чтобы симулятор оставался отзывчивым
-        menu_navigate_update();
+        menu_update();
+
         // Например, проверяем, нужно ли перерисовать меню
-        if (menu_context_is_invalidate()) {
+        if (menu_ack_redraw()) {
             menu_draw(lcd);
         }
 

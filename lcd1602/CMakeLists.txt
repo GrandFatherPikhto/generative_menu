@@ -51,6 +51,7 @@ target_link_libraries(${EXEC_NAME} PRIVATE
     # ${LIB_NAME}
     LCD1602::LCD1602
     MenuWork
+    MenuData
 )
 
 message("Menu Work Includes: ${MenuWork}")

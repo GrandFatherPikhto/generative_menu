@@ -1,23 +1,22 @@
 #include "menu_draw.h"
-#include "menu_common.h"
 #include "menu_context.h"
-#include "menu_config.h"
-#include "menu_values.h"
 #include "menu_tree.h"
+#include "menu_config.h"
+#include "menu_value.h"
 
 #include <string.h>
 #include <stdio.h>
 
-void menu_draw_update(menu_context_t *ctx, menu_id_t id) {
+bool menu_draw_update(menu_context_t *ctx, menu_id_t id) {
     
     if (id >= MENU_ID_COUNT || ctx->dirty == false)
-        return;
+        return false;
 
     const menu_node_t *node = &(ctx->nodes[id]);
     const menu_node_config_t *config = &(ctx->configs[id]);
 
-    char *title_str = menu_context_get_title_str();
-    char *value_str = menu_context_get_value_str();
+    char *title_str = ctx->title_buf;
+    char *value_str = ctx->value_buf;
     
     memset((void *)title_str, 0, LCD_STRING_LEN);
     memset((void *)value_str, 0, LCD_STRING_LEN);
@@ -34,6 +33,8 @@ void menu_draw_update(menu_context_t *ctx, menu_id_t id) {
 
     ctx->dirty = false;
     ctx->invalidate = true;
+
+    return ctx->invalidate;
 }
 
 /**
@@ -43,7 +44,7 @@ void menu_draw_string_fixed_value_cb(menu_context_t *ctx, menu_id_t id) {
     const menu_node_config_t *config = &(ctx->configs[id]);
     menu_node_value_t *value = &(ctx->values[id]);
     uint8_t idx = value->data.string_fixed.idx;
-    const char *value_str = menu_context_get_value_str();
+    const char *value_str = ctx->value_buf;
 
     snprintf((char *)value_str, LCD_STRING_LEN, "%-15.15s%c", 
         config->data.string_fixed.values[idx], 
@@ -53,7 +54,7 @@ void menu_draw_string_fixed_value_cb(menu_context_t *ctx, menu_id_t id) {
 void menu_draw_udword_factor_value_cb(menu_context_t *ctx, menu_id_t id) {
     const menu_node_config_t *config = &(ctx->configs[id]);
     menu_node_value_t *value = &(ctx->values[id]);
-    const char *value_str = menu_context_get_value_str();
+    const char *value_str = ctx->value_buf;
 
     uint8_t idx = value->data.udword_factor.idx;
     uint32_t factor = config->data.udword_factor.factors[idx];
@@ -70,7 +71,7 @@ void menu_draw_udword_factor_value_cb(menu_context_t *ctx, menu_id_t id) {
 void menu_draw_ubyte_simple_value_cb(menu_context_t *ctx, menu_id_t id) {
     const menu_node_config_t *config = &(ctx->configs[id]);
     menu_node_value_t *value = &(ctx->values[id]);
-    const char *value_str = menu_context_get_value_str();
+    const char *value_str = ctx->value_buf;
 
     uint8_t val = value->data.ubyte_simple.value;
     uint8_t max = config->data.ubyte_simple.max;

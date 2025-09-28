@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "menu_common.h"
+#include "menu_types.h"
 #include "menu_edit.h"
 
 typedef enum {
@@ -43,8 +43,11 @@ typedef struct s_ubyte_simple_config_t {
 } ubyte_simple_config_t;
 
 typedef void (*menu_click_cb_t)(menu_context_t *ctx, menu_id_t id);
+typedef void (*menu_double_click_cb_t)(menu_context_t *ctx, menu_id_t id);
+typedef void (*menu_long_click_cb_t)(menu_context_t *ctx, menu_id_t id);
 typedef void (*menu_position_cb_t)(menu_context_t *ctx, menu_id_t id, int8_t delta);
 typedef void (*menu_draw_value_cb_t)(menu_context_t *ctx, menu_id_t id);
+typedef void (*menu_handle_event_cb_t)(menu_context_t *ctx, menu_id_t id, menu_event_t event);
 
 typedef union s_menu_node_config_data_t {
     stub_config_t stub_config;
@@ -57,8 +60,11 @@ typedef struct s_menu_node_config_t {
     menu_id_t id;
     menu_category_t category;
     menu_click_cb_t click_cb;
+    menu_long_click_cb_t long_click_cb;
+    menu_double_click_cb_t double_click_cb;
     menu_position_cb_t position_cb;
     menu_draw_value_cb_t draw_value_cb;
+    menu_handle_event_cb_t handle_event_cb;
     menu_node_config_data_t data;
 } menu_node_config_t;
 
