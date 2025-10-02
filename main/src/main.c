@@ -4,7 +4,7 @@
 #include <signal.h>
 #include <execinfo.h>
 
-#include "menu_handle.h"
+#include "menu.h"
 
 typedef struct s_rotary_encoder_t {
     int position;
@@ -37,33 +37,33 @@ void on_position_change(int new_pos) {
 
     printf("Position changed: %d/%d\n", s_rotary_encoder.delta, s_rotary_encoder.position);
     // Здесь обновляем меню или что-то еще
-    menu_handle_position(s_rotary_encoder.delta);
+    menu_position(s_rotary_encoder.delta);
 }
 
 void on_push_button() {
     printf("Button pushed\n");
     // Обработка короткого нажатия
-    menu_handle_enter();
+    menu_enter();
 }
 
 void on_long_push_button() {
     printf("Long button push\n");
     // Обработка длинного нажатия
-    menu_handle_back();
+    menu_back();
 }
 
 void on_double_click() {
     printf("Double click\n");
     // Обработка двойного нажатия
-    menu_handle_reset();
+    menu_reset();
 }
 
 void menu_draw(sdl_handle_t *lcd) {
     lcd_sdl_clear(lcd);
     lcd_sdl_set_cursor(lcd, 0, 0);
-    lcd_sdl_print_str(lcd, menu_get_display_title());
+    lcd_sdl_print_str(lcd, menu_title_buf());
     lcd_sdl_set_cursor(lcd, 0, 1);
-    lcd_sdl_print_str(lcd, menu_get_display_value());
+    lcd_sdl_print_str(lcd, menu_value_buf());
 }
 
 int main() {

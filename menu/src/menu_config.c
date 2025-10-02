@@ -1,168 +1,160 @@
+#include "menu_edit.h"
+#include "menu_context.h"
 #include "menu_config.h"
-#include "menu_struct.h"
 
-static const uint32_t s_factors_hi_delay[] = { 1, 10, 100, 1000 };
-static const uint32_t s_factors_hi_duration[] = { 1, 10, 100, 1000 };
-static const uint32_t s_factors_lo_delay[] = { 1, 10, 100, 1000 };
-static const uint32_t s_factors_lo_duration[] = { 1, 10, 100, 1000 };
-
-static const char * *s_values_str_start[] = { "Start", "Started" };
-static const char * *s_values_str_regimes[] = { "Simple", "Strong", "Quality" };
-static const char * *s_values_str_hi_pwm_on[] = { "Off", "On" };
-static const char * *s_values_str_lo_pwm_on[] = { "Off", "On" };
-
-/**
-  * @note Пока тип callback не поддерживается
-  **/
-static const menu_node_config_t s_nodes_data[] = {
-    [MENU_ID_START] = {        
-        .id = MENU_ID_START,
-        .category = MENU_CATEGORY_STRING_FIXED,
-        .data.string_fixed = {
-            .count = 2,
-            .default_idx = 0,
-            .values = s_values_str_start
-        }
-    },
-    [MENU_ID_REGIMES] = {        
-        .id = MENU_ID_REGIMES,
-        .category = MENU_CATEGORY_STRING_FIXED,
-        .data.string_fixed = {
-            .count = 3,
-            .default_idx = 2,
-            .values = s_values_str_regimes
-        }
-    },
-    [MENU_ID_HI_DELAY] = {        
-        .id = MENU_ID_HI_DELAY,
-        .category = MENU_CATEGORY_UDWORD_FACTOR,
-        .click_cb = udword_factor_click_cyclic_cb,
-        .position_cb = udword_factor_position_limit_cb,
-        .data.udword_factor = {
-            .min = 10,
-            .max = 10000,
-            .default_value = 10,
-            .default_idx = 0,
-            .count = 4,
-            .factors = s_factors_hi_delay
-        }
-    },
-    [MENU_ID_HI_DURATION] = {        
-        .id = MENU_ID_HI_DURATION,
-        .category = MENU_CATEGORY_UDWORD_FACTOR,
-        .click_cb = udword_factor_click_cyclic_cb,
-        .position_cb = udword_factor_position_limit_cb,
-        .data.udword_factor = {
-            .min = 10,
-            .max = 10000,
-            .default_value = 10,
-            .default_idx = 2,
-            .count = 4,
-            .factors = s_factors_hi_duration
-        }
-    },
-    [MENU_ID_HI_PWM_ON] = {        
-        .id = MENU_ID_HI_PWM_ON,
-        .category = MENU_CATEGORY_STRING_FIXED,
-        .data.string_fixed = {
-            .count = 2,
-            .default_idx = 0,
-            .values = s_values_str_hi_pwm_on
-        }
-    },
-    [MENU_ID_HI_DUTY] = {        
-        .id = MENU_ID_HI_DUTY,
-        .category = MENU_CATEGORY_UBYTE_SIMPLE,
-        .data.ubyte_simple = {
-            .step = 1,
-            .min = 0,
-            .max = 95,
-            .default_value = 30
-        }
-    },
-    [MENU_ID_LO_DELAY] = {        
-        .id = MENU_ID_LO_DELAY,
-        .category = MENU_CATEGORY_UDWORD_FACTOR,
-        .click_cb = udword_factor_click_cyclic_cb,
-        .position_cb = udword_factor_position_limit_cb,
-        .data.udword_factor = {
-            .min = 10,
-            .max = 10000,
-            .default_value = 10,
-            .default_idx = 0,
-            .count = 4,
-            .factors = s_factors_lo_delay
-        }
-    },
-    [MENU_ID_LO_DURATION] = {        
-        .id = MENU_ID_LO_DURATION,
-        .category = MENU_CATEGORY_UDWORD_FACTOR,
-        .click_cb = udword_factor_click_cyclic_cb,
-        .position_cb = udword_factor_position_limit_cb,
-        .data.udword_factor = {
-            .min = 10,
-            .max = 10000,
-            .default_value = 10,
-            .default_idx = 0,
-            .count = 4,
-            .factors = s_factors_lo_duration
-        }
-    },
-    [MENU_ID_LO_PWM_ON] = {        
-        .id = MENU_ID_LO_PWM_ON,
-        .category = MENU_CATEGORY_STRING_FIXED,
-        .data.string_fixed = {
-            .count = 2,
-            .default_idx = 0,
-            .values = s_values_str_lo_pwm_on
-        }
-    },
-    [MENU_ID_LO_DUTY] = {        
-        .id = MENU_ID_LO_DUTY,
-        .category = MENU_CATEGORY_UBYTE_SIMPLE,
-        .data.ubyte_simple = {
-            .step = 1,
-            .min = 0,
-            .max = 95,
-            .default_value = 30
-        }
-    },
-};
-
-const menu_node_config_t *menu_get_config(menu_id_t id) {
+const menu_node_config_t *menu_config_get_by_id(menu_context_t *ctx, menu_id_t id) {
     if (id >= MENU_ID_COUNT)
-        return 0;
-    return &(s_nodes_data[id]);
+        return NULL;
+    return &(ctx->configs[id]);
 }
 
-menu_click_cb_t menu_get_click_cb(menu_id_t id) {
+bool menu_config_handle_position_cb(menu_context_t *ctx, menu_id_t id, int8_t delta) {
     if (id >= MENU_ID_COUNT)
-        return 0;
-    return s_menu_nodes[id].click_cb;
-}
+        return false;
 
-menu_position_cb_t menu_get_position_cb(menu_id_t id) {
-    if (id >= MENU_ID_COUNT)
-        return 0;
-    return s_menu_nodes[id].position_cb_cb;
-}
-
-void menu_handle_position_cb(menu_id_t id, int8_t delta) {
-    if (id >= MENU_ID_COUNT)
-        return;
-    if (s_menu_nodes[id].position_cb) {
-        s_menu_nodes[id].position_cb(id, delta);
+    if (ctx->configs[id].position_cb) {
+        ctx->configs[id].position_cb(ctx, id, delta);
+        return true;
     }
+
+    return false;
 }
 
-void menu_handle_click_cb(menu_id_t id) {
+bool menu_config_handle_click_cb(menu_context_t *ctx, menu_id_t id) {
     if (id >= MENU_ID_COUNT)
-        return;
-    if (s_menu_nodes[id].click_cb) {
-        s_menu_nodes[id].click_cb(id);
+        return false;
+
+    if (ctx->configs[id].click_cb) {
+        ctx->configs[id].click_cb(ctx, id);
+        return true;
     }
+
+    return false;
 }
 
-const menu_id_t get_first_id(void) {
-    return MENU_ID_START;
+bool menu_config_handle_long_click_cb(menu_context_t *ctx, menu_id_t id) {
+    if (id >= MENU_ID_COUNT)
+        return false;
+
+    if (ctx->configs[id].long_click_cb) {
+        ctx->configs[id].long_click_cb(ctx, id);
+        return true;
+    }
+
+    return false;
 }
+
+bool menu_config_handle_double_click_cb(menu_context_t *ctx, menu_id_t id) {
+    if (id >= MENU_ID_COUNT)
+        return false;
+
+    if (ctx->configs[id].double_click_cb) {
+        ctx->configs[id].double_click_cb(ctx, id);
+        return true;
+    }
+
+    return false;
+}
+
+bool menu_config_handle_draw_value_cb(menu_context_t *ctx, menu_id_t id) {
+    if (id >= MENU_ID_COUNT)
+        return false;
+
+    if (ctx->configs[id].draw_value_cb) {
+        ctx->configs[id].draw_value_cb(ctx, id);
+        return true;
+    }
+
+    return false;
+}
+
+bool menu_config_handle_event_cb(menu_context_t *ctx, menu_id_t id, menu_event_t event) {
+    if (id >= MENU_ID_COUNT)
+        return false;
+
+    if (ctx->configs[id].event_cb) {
+        ctx->configs[id].event_cb(ctx, id, event);
+        return true;
+    }
+
+    return false;
+}
+
+uint8_t menu_config_get_string_fixed_count(menu_context_t *ctx, menu_id_t id) {
+    if (id >= MENU_ID_COUNT)
+        return 0;
+    return ctx->configs[id].data.string_fixed.count;
+}
+
+uint8_t menu_config_get_string_fixed_default_idx(menu_context_t *ctx, menu_id_t id) {
+    if (id >= MENU_ID_COUNT)
+        return 0;
+    return ctx->configs[id].data.string_fixed.default_idx;
+}
+
+const char* menu_config_get_string_fixed_current(menu_context_t *ctx, menu_id_t id, uint8_t idx) {
+    if (id >= MENU_ID_COUNT)
+        return 0;
+    return ctx->configs[id].data.string_fixed.values[idx];
+}
+
+uint8_t menu_config_get_udword_factor_count(menu_context_t *ctx, menu_id_t id) {
+    if (id >= MENU_ID_COUNT)
+        return 0;
+    return ctx->configs[id].data.udword_factor.count;
+}
+
+uint8_t menu_config_get_udword_factor_default_idx(menu_context_t *ctx, menu_id_t id) {
+    if (id >= MENU_ID_COUNT)
+        return 0;
+    return ctx->configs[id].data.udword_factor.default_idx;
+}
+
+uint32_t menu_config_get_udword_factor_min(menu_context_t *ctx, menu_id_t id) {
+    if (id >= MENU_ID_COUNT)
+        return 0;
+    return ctx->configs[id].data.udword_factor.min;
+}
+
+uint32_t menu_config_get_udword_factor_max(menu_context_t *ctx, menu_id_t id) {
+    if (id >= MENU_ID_COUNT)
+        return 0;
+    return ctx->configs[id].data.udword_factor.max;
+}
+
+uint32_t menu_config_get_udword_factor_current(menu_context_t *ctx, menu_id_t id, uint8_t factor_idx) {
+    if (id >= MENU_ID_COUNT)
+        return 0;
+    return ctx->configs[id].data.udword_factor.factors[factor_idx];
+}
+
+uint32_t menu_config_get_udword_factor_default_value(menu_context_t *ctx, menu_id_t id) {
+    if (id >= MENU_ID_COUNT)
+        return 0;
+    return ctx->configs[id].data.udword_factor.default_value;
+}
+
+uint8_t menu_config_get_ubyte_simple_min(menu_context_t *ctx, menu_id_t id) {
+    if (id >= MENU_ID_COUNT)
+        return 0;
+    return ctx->configs[id].data.ubyte_simple.min;
+}
+
+uint8_t menu_config_get_ubyte_simple_max(menu_context_t *ctx, menu_id_t id) {
+    if (id >= MENU_ID_COUNT)
+        return 0;
+    return ctx->configs[id].data.ubyte_simple.max;
+}
+
+uint8_t menu_config_get_ubyte_simple_step(menu_context_t *ctx, menu_id_t id) {
+    if (id >= MENU_ID_COUNT)
+        return 0;
+    return ctx->configs[id].data.ubyte_simple.step;
+}
+
+uint8_t menu_config_get_ubyte_simple_default_value(menu_context_t *ctx, menu_id_t id) {
+    if (id >= MENU_ID_COUNT)
+        return 0;
+    return ctx->configs[id].data.ubyte_simple.default_value;
+}
+

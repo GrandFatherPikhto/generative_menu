@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(menu_lcd1602)
+project(MenuLCD1602)
 
 # Указываем путь к заголовочным файлам
 set(MENU_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/menu/src/include")
@@ -9,6 +9,6 @@ include(CTest)
 enable_testing()
 
 # Добавляем подпроекты
-# add_subdirectory(menu)
-add_subdirectory(work)
-add_subdirectory(lcd1602)
+add_subdirectory(menu)
+# add_subdirectory(work)
+add_subdirectory(main)

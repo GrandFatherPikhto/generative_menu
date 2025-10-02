@@ -1,6 +1,7 @@
-#include "menu_struct.h"
+#include "menu_data_tree.h"
+#include "menu_tree.h"
 
-static const menu_node_t s_menu_nodes[] = {
+static const menu_node_t s_menu_tree[] = {
     [MENU_ID_ROOT] = {
         .id = MENU_ID_ROOT,
         .title = "root",
@@ -43,7 +44,7 @@ static const menu_node_t s_menu_nodes[] = {
         .parent = MENU_ID_ROOT,
         .child = MENU_ID_PWM_FREQUENCY,
         .prev = MENU_ID_VERSION,
-        .next = MENU_ID_COUNT,
+        .next = MENU_ID_START,
         .type = MENU_TREE_TYPE_BRANCH
     },
     [MENU_ID_PWM_FREQUENCY] = {
@@ -51,7 +52,7 @@ static const menu_node_t s_menu_nodes[] = {
         .title = "PWM Frequency",
         .parent = MENU_ID_SETTINGS,
         .child = MENU_ID_COUNT,
-        .prev = MENU_ID_LO_CHANNEL,
+        .prev = MENU_ID_COUNT,
         .next = MENU_ID_HI_CHANNEL,
         .type = MENU_TREE_TYPE_LEAF
     },
@@ -146,60 +147,12 @@ static const menu_node_t s_menu_nodes[] = {
         .type = MENU_TREE_TYPE_LEAF
     },
     
-}; 
+};
 
-const menu_node_t *menu_get_tree(void) {
-    return s_menu_nodes;
+const menu_node_t *menu_data_get_tree(void) {
+    return s_menu_tree;
 }
 
-const menu_node_t *menu_get_node(menu_id_t id) {
-    if (id >= MENU_ID_COUNT)
-        return 0;
-    return &(s_menu_nodes[id]);
-}
-
-menu_id_t menu_get_next(menu_id_t id) {
-    const menu_node_t *node = menu_get_node(id);
-    if (node == 0)
-        return MENU_ID_COUNT;
-
-    if (node->next == MENU_ID_COUNT)
-        return node->prev;
-    
-    return node->next;
-}
-
-menu_id_t menu_get_prev(menu_id_t id) {
-    const menu_node_t *node = menu_get_node(id);
-    if (node == 0)
-        return MENU_ID_COUNT;
-    return node->prev;
-}
-
-menu_id_t menu_get_parent (menu_id_t id) {
-    const menu_node_t *node = menu_get_node(id);
-    if (node == 0)
-        return MENU_ID_COUNT;
-    if (node->parent == MENU_ID_ROOT)
-        return MENU_ID_COUNT;
-    return node->parent;
-}
-
-menu_id_t menu_get_child (menu_id_t id) {
-    const menu_node_t *node = menu_get_node(id);
-    if (node == 0)
-        return MENU_ID_COUNT;
-    return node->child;
-}
-
-const char *menu_get_title(menu_id_t id) {
-    if (id >= MENU_ID_COUNT)
-        return 0;
-    return s_menu_nodes[id].title;
-}
-
-menu_tree_type_t menu_get_tree_type(menu_id_t id) {
-    if (id > MENU_ID_COUNT)
-        return MENU_TREE_TYPE_NONE;
-    return s_menu_nodes[id].type;
+menu_id_t menu_data_get_first_id(void) {
+    return MENU_ID_START;
 }

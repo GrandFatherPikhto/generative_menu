@@ -1,10 +1,10 @@
-#ifndef MENU_VALUES_H
-#define MENU_VALUES_H
+#ifndef MENU_VALUE_H
+#define MENU_VALUE_H
 
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "menu_struct.h"
+#include "menu_type.h"
 
 typedef struct stub_value_t {} stub_value_t;
 typedef struct {
@@ -21,7 +21,7 @@ typedef struct {
     uint8_t value;
 } ubyte_simple_value_t;
 
-typedef struct menu_value {
+typedef struct menu_node_value {
     menu_id_t id;
     union {
         stub_value_t stub_value;
@@ -30,8 +30,13 @@ typedef struct menu_value {
         udword_factor_value_t udword_factor;
         ubyte_simple_value_t ubyte_simple;
     } data;
-} menu_item_value_t;
+} menu_node_value_t;
 
-menu_item_value_t *menu_get_value(menu_id_t id);
+menu_node_value_t *menu_value_get_by_id(menu_context_t *ctx, menu_id_t id);
 
-#endif // MENU_VALUES_H
+uint8_t *menu_value_get_string_fixed_idx(menu_context_t *ctx, menu_id_t id);
+uint32_t *menu_value_get_udword_factor_value(menu_context_t *ctx, menu_id_t id);
+uint8_t *menu_value_get_udword_factor_idx(menu_context_t *ctx, menu_id_t id);
+uint8_t *menu_value_get_ubyte_simple_value(menu_context_t *ctx, menu_id_t id);
+
+#endif // MENU_VALUE_H

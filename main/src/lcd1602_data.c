@@ -1,4 +1,4 @@
-#include "menu_handle.h"
+#include "menu.h"
 
 #include <stdio.h>
 
@@ -8,41 +8,41 @@ typedef struct {
 } frequency_t;
 
 static frequency_t s_frequencies[] = {
-        {10000, 1000}, // 1.0 kHz
-        {8000, 1250}, // 1.25 kHz
-        {6250, 1600}, // 1.6 kHz
-        {5000, 2000}, // 2.0 kHz
-        {4000, 2500}, // 2.5 kHz
-        {3200, 3125}, // 3.125 kHz
-        {3125, 3200}, // 3.2 kHz
-        {2500, 4000}, // 4.0 kHz
-        {2000, 5000}, // 5.0 kHz
-        {1600, 6250}, // 6.25 kHz
-        {1250, 8000}, // 8.0 kHz
-        {1000, 10000}, // 10.0 kHz
-        {800, 12500}, // 12.5 kHz
-        {640, 15625}, // 15.625 kHz
-        {625, 16000}, // 16.0 kHz
-        {500, 20000}, // 20.0 kHz
-        {400, 25000}, // 25.0 kHz
-        {320, 31250}, // 31.25 kHz
-        {250, 40000}, // 40.0 kHz
-        {200, 50000}, // 50.0 kHz
-        {160, 62500}, // 62.5 kHz
-        {128, 78125}, // 78.125 kHz
-        {125, 80000}, // 80.0 kHz
-        {100, 100000}, // 0.1 MHz
-        {80, 125000}, // 0.125 MHz
-        {64, 156250}, // 0.15625 MHz
-        {50, 200000}, // 0.2 MHz
-        {40, 250000}, // 0.25 MHz
-        {32, 312500}, // 0.3125 MHz
-        {25, 400000}, // 0.4 MHz
-        {20, 500000}, // 0.5 MHz
-        {16, 625000}, // 0.625 MHz
-        {10, 1000000}, // 1.0 MHz
-        {8, 1250000}, // 1.25 MHz
-        {5, 2000000}, // 2.0 MHz
+    {10000, 1000}, // 1.0 kHz
+    {8000, 1250}, // 1.25 kHz
+    {6250, 1600}, // 1.6 kHz
+    {5000, 2000}, // 2.0 kHz
+    {4000, 2500}, // 2.5 kHz
+    {3200, 3125}, // 3.125 kHz
+    {3125, 3200}, // 3.2 kHz
+    {2500, 4000}, // 4.0 kHz
+    {2000, 5000}, // 5.0 kHz
+    {1600, 6250}, // 6.25 kHz
+    {1250, 8000}, // 8.0 kHz
+    {1000, 10000}, // 10.0 kHz
+    {800, 12500}, // 12.5 kHz
+    {640, 15625}, // 15.625 kHz
+    {625, 16000}, // 16.0 kHz
+    {500, 20000}, // 20.0 kHz
+    {400, 25000}, // 25.0 kHz
+    {320, 31250}, // 31.25 kHz
+    {250, 40000}, // 40.0 kHz
+    {200, 50000}, // 50.0 kHz
+    {160, 62500}, // 62.5 kHz
+    {128, 78125}, // 78.125 kHz
+    {125, 80000}, // 80.0 kHz
+    {100, 100000}, // 0.1 MHz
+    {80, 125000}, // 0.125 MHz
+    {64, 156250}, // 0.15625 MHz
+    {50, 200000}, // 0.2 MHz
+    {40, 250000}, // 0.25 MHz
+    {32, 312500}, // 0.3125 MHz
+    {25, 400000}, // 0.4 MHz
+    {20, 500000}, // 0.5 MHz
+    {16, 625000}, // 0.625 MHz
+    {10, 1000000}, // 1.0 MHz
+    {8, 1250000}, // 1.25 MHz
+    {5, 2000000}, // 2.0 MHz
 };
 
 #include <string.h>
@@ -66,8 +66,8 @@ void rotenc_hi_duty_changed(menu_context_t *ctx, menu_id_t id, menu_event_t even
 void pwm_frequency_display_cb(menu_context_t *ctx, menu_id_t id) {
     int32_t frequency = s_frequencies[s_context.frequency_idx].frequency;
     // printf("Frequency_idx: %u, Frequency: %d\n", s_context.frequency_idx, frequency);
-    char *value_str = menu_get_display_value();
-    menu_state_t state = menu_get_state();
+    char *value_str = menu_value_buf();
+    menu_state_t state = menu_state();
     int len = 0;
 
     if (frequency < 1000) {
@@ -99,3 +99,12 @@ void pwm_frequency_change_cb(menu_context_t *ctx, menu_id_t id, int8_t delta) {
     menu_set_dirty();
 }
 
+void my_event_cb(menu_context_t *ctx, menu_id_t id, menu_event_t event) {
+
+}
+
+void draw_version_cb(menu_context_t *ctx, menu_id_t) {
+    char *value = menu_value_buf();
+    strncpy(value, "Ver. 1.0", LCD_STRING_LEN);
+    menu_set_dirty();
+}

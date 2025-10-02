@@ -28,13 +28,13 @@ set(LIB_SOURCES
 
 set(EXEC_SOURCES
     src/main.c
-    src/menu_data.c
+    src/lcd1602_data.c
 )
 
 set(INCLUDE_DIRECTORIES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/include
     ${LCD1602_INCLUDE_DIRS}
-    ../work/src/include
+    ../menu/src/include
 )
 
 message("LCD1602 Include Dir ${LCD1602_INCLUDE_DIRS}")
@@ -43,15 +43,14 @@ add_executable(${EXEC_NAME}
     ${EXEC_SOURCES} 
     ${INCLUDES})
 
-# add_library(${LIB_NAME}
-#     ${LIB_SOURCES}
-#     ${INCLUDES}
+# add_library(${EXEC_NAME} PRIVATE
+#     Menu
 # )    
 
 target_link_libraries(${EXEC_NAME} PRIVATE
     # ${LIB_NAME}
     LCD1602::LCD1602
-    MenuWork
+    Menu
 )
 
 message("Menu Work Includes: ${MenuWork}")

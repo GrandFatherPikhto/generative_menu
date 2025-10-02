@@ -1,103 +1,125 @@
+#include "menu_tree.h"
 #include "menu_edit.h"
-#include "menu_struct.h"
 #include "menu_config.h"
-#include "menu_values.h"
+#include "menu_value.h"
+#include "menu_context.h"
 
-/** @brief Функция для простейших числовых типов и строк
+/** @brief Функция для фиксированных наборов значений
   * Последующее или предыдущее значение берётся из массива values
   * Если control == click, то navigation _только_ cycle.
   * @param id Идентификтор меню Определён, в enum в menu_struct.h
   * @param delta Количество "щелчков" энкодера. Передаётся только если control==position
   */
-void string_fixed_click_cyclic_cb(menu_id_t id) {
-    menu_item_config_t *config = menu_get_config(id);
-    menu_item_value_t  *value  = menu_get_value(id);
-    uint8_t *idx = &(value->data.string_fixed.idx);
-    uint8_t count = config->data.string_fixed.count;
-    *idx = (*idx + 1) % count;
+void string_fixed_click_cyclic_cb(menu_context_t *ctx, menu_id_t id) {
+    uint8_t *idx  = menu_value_get_string_fixed_idx(ctx, id);
+    uint8_t old_idx = *idx;
+    uint8_t count = menu_config_get_string_fixed_count(ctx, id);
+    if (count == 0) {
+       return; // Или установите idx в 0
+    }
 
-    menu_update();
+    if (count - 1 > *idx)
+        *idx = *idx + 1;
+    else
+        *idx = 0;
+
+    if (*idx != old_idx) {
+        menu_context_set_dirty(ctx);
+    }
 }
 
-/** @brief Функция для простейших числовых типов и строк
-  * Последующее или предыдущее значение берётся из массива values
-  * Если control == click, то navigation _только_ cycle.
-  * @param id Идентификтор меню Определён, в enum в menu_struct.h
-  * @param delta Количество "щелчков" энкодера. Передаётся только если control==position
-  */
-void string_fixed_position_cyclic_cb(menu_id_t id, int8_t delta) {
-    menu_item_config_t *config = menu_get_config(id);
-    menu_item_value_t  *value  = menu_get_value(id);
-    uint8_t *idx = &(value->data.string_fixed.idx);
-    uint8_t count = config->data.string_fixed.count;
-    if (delta > 0)
-        *idx = (*idx + delta) >= count ? 0 : (*idx + 1);
-    else if (delta < 0)
-        *idx = (*idx + delta) < 0 ? count - 1 : (*idx + delta);
 
-    menu_update();
+void string_fixed_position_cyclic_cb(menu_context_t *ctx, menu_id_t id, int8_t delta) {
+    uint8_t *idx  = menu_value_get_string_fixed_idx(ctx, id);
+    uint8_t old_idx = *idx;
+    uint8_t count = menu_config_get_string_fixed_count(ctx, id);
+    if (count == 0) {
+       return; // Или установите idx в 0
+    }
+    if (delta > 0) {
+        if (count - delta > *idx) {
+            *idx = *idx + delta;
+        } else {
+            *idx = 0;
+        }
+    }
+
+    if (delta < 0) {
+        if (count + delta > 0) {
+            *idx = *idx + delta;
+        } else {
+            *idx = count - 1;
+        }
+    }
+    if (*idx != old_idx) {
+        menu_context_set_dirty(ctx);
+    }
 }
 
-/** @brief Функция для простейших числовых типов.
+
+/** @brief Функция для изменения простого числового типа при помощи множителя.
+  * Здесь обрабатывается клик.
   * Изменение значение изменяется пропорционально выбранному значению factor
-  * Если control == click, то navigation _только_ cycle.
+  * Если control == click, то navigation _только_ cycle. И для factor клик меняет
+  * индекс factor (множителя) из массива factors
   * @param id Идентификтор меню Определён, в enum в menu_struct.h
   * @param delta Количество "щелчков" энкодера. Передаётся только если control==position
+  * click
   */
-void udword_factor_click_cyclic_cb(menu_id_t id) {
-    menu_item_config_t *config = menu_get_config(id);
-    menu_item_value_t  *value  = menu_get_value(id);
-    uint32_t *val  = &(value->data.udword_factor.value);
-    uint32_t  step = config->data.udword_factor.step;
-    uint32_t   min = config->data.udword_factor.min;
-    uint32_t   max = config->data.udword_factor.max;
-    uint8_t *idx = &(value->data.udword_factor.idx);
-    uint32_t  count = config->data.udword_factor.count;
-    *idx = (*idx + 1) % count; // Кольцевое изменение индекса фактора по клику
+void udword_factor_click_cyclic_factor_cb(menu_context_t *ctx, menu_id_t id) {
+    uint8_t *idx  = menu_value_get_udword_factor_idx(ctx, id);
+    uint8_t count = menu_config_get_udword_factor_count(ctx, id);
+    uint8_t old_idx = *idx;
 
-    menu_update();
+    if ((*idx + 1) >= count) {
+        *idx = 0;
+    } else {
+        *idx = *idx + 1;
+    }
+
+    if (*idx != old_idx) {
+        menu_context_set_dirty (ctx);
+    }
 }
 
-/** @brief Функция для простейших числовых типов.
+
+
+/** @brief Функция для изменения простого числового типа при помощи множителя.
+  * Здесь обрабатывается позиция энкодера. 
   * Изменение значение изменяется пропорционально выбранному значению factor
-  * Если control == click, то navigation _только_ cycle.
+  * Значение value может изменяться по кругу, т.е., достигнув максимального значения max становится min
+  * Достигнув минимального значения min становится max
   * @param id Идентификтор меню Определён, в enum в menu_struct.h
   * @param delta Количество "щелчков" энкодера. Передаётся только если control==position
+  * position
   */
-void udword_factor_position_limit_cb(menu_id_t id, int8_t delta) {
-    menu_item_config_t *config = menu_get_config(id);
-    menu_item_value_t  *value  = menu_get_value(id);
-    uint32_t *val  = &(value->data.udword_factor.value);
-    uint32_t  step = config->data.udword_factor.step;
-    uint32_t   min = config->data.udword_factor.min;
-    uint32_t   max = config->data.udword_factor.max;
-    uint8_t *idx = &(value->data.udword_factor.idx);
-    uint32_t factor = config->data.udword_factor.factors[*idx];
-    if (delta < 0)
-        *val = (*val + delta * factor) > min ? (*val + delta * factor) : min;
-    else if (delta > 0)
-        *val = (*val + delta * factor) < max ? (*val + delta * factor) : max;
-
-    menu_update();
+void udword_factor_position_limit_cb(menu_context_t *ctx, menu_id_t id, int8_t delta) {
+    uint8_t *idx  = menu_value_get_udword_factor_idx(ctx, id);
+    uint32_t min = menu_config_get_udword_factor_min(ctx, id);
+    uint32_t max = menu_config_get_udword_factor_max(ctx, id);
+    uint32_t factor = menu_config_get_udword_factor_current(ctx, id, *idx);
+    uint32_t *value = menu_value_get_udword_factor_value(ctx, id);
+    uint32_t old_value = *value;
+    if (delta > 0) {
+        // Увеличение с проверкой переполнения
+        if (*value <= max - (uint32_t)(delta * factor)) {
+            *value += delta * factor;
+        } else {
+            *value = max;
+        }
+    } else {
+        // Уменьшение с проверкой underflow
+        if (*value >= min + (uint32_t)(-delta * factor)) {
+            *value += delta * factor;  // delta отрицательный
+        } else {
+            *value = min;
+        }
+    }
+    if (*value != old_value) {
+        menu_context_set_dirty(ctx);
+    }
 }
 
-/** @brief Функция для простейших численных типов.
-  * Если control == click, то navigation _только_ cycle.
-  * Значения зациклены. Достигнув max переходят в min, достигнув min переходят в max
-  * @param id Идентификтор меню Определён, в enum в menu_struct.h
-  * @param delta Количество "щелчков" энкодера. Передаётся только если control==position
-  */
-void ubyte_simple_click_cyclic_cb(menu_id_t id) {
-    menu_item_config_t *config = menu_get_config(id);
-    menu_item_value_t  *value  = menu_get_value(id);
-    uint8_t *val  = &(value->data.ubyte_simple.value);
-    uint8_t  step = config->data.ubyte_simple.step;
-    uint8_t   min = config->data.ubyte_simple.min;
-    uint8_t   max = config->data.ubyte_simple.max;
-    *val = (*val + step) < max ? (*val + step) : min; ///< Шагаем только вперёд. Зациклено
-
-    menu_update();
-}
 
 /** @brief Функция для простейших численных типов.
   * Если control == click, то navigation _только_ cycle.
@@ -106,18 +128,30 @@ void ubyte_simple_click_cyclic_cb(menu_id_t id) {
   * @param id Идентификтор меню Определён, в enum в menu_struct.h
   * @param delta Количество "щелчков" энкодера. Передаётся только если control==position
   */
-void ubyte_simple_position_limit_cb(menu_id_t id, int8_t delta) {
-    menu_item_config_t *config = menu_get_config(id);
-    menu_item_value_t  *value  = menu_get_value(id);
-    uint8_t *val  = &(value->data.ubyte_simple.value);
-    uint8_t  step = config->data.ubyte_simple.step;
-    uint8_t   min = config->data.ubyte_simple.min;
-    uint8_t   max = config->data.ubyte_simple.max;
-    if (delta < 0)
-        *val = (*val + delta * step) > min ? (*val + delta * step) : min;
-    else if (delta > 0)
-        *val = (*val + delta * step) < max ? (*val + delta * step) : max;
+void ubyte_simple_position_limit_cb(menu_context_t *ctx, menu_id_t id, int8_t delta) {
+    uint8_t *value  = menu_value_get_ubyte_simple_value(ctx, id);
+    uint8_t  step = menu_config_get_ubyte_simple_step(ctx, id);
+    uint8_t   min = menu_config_get_ubyte_simple_min(ctx, id);
+    uint8_t   max = menu_config_get_ubyte_simple_max(ctx, id);
+    uint8_t old_value = *value;  
+    if (delta > 0) {
+      if ((*value + step * delta) > max) {
+        *value = max;
+      } else {
+        *value = *value + step * delta;
+      }
+    }
 
-    menu_update();
+    if (delta < 0) {
+      if ((*value + step * delta) < min) {
+        *value = min;
+      } else {
+        *value = *value + step * delta;
+      }
+    }
+    if (*value != old_value) {
+      menu_context_set_dirty(ctx);
+    }
 }
+
 

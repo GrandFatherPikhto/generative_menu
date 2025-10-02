@@ -1,0 +1,31 @@
+#ifndef MENU_TREE_H
+#define MENU_TREE_H
+
+#include <stdint.h>
+#include <stdbool.h>
+#include <stddef.h>
+
+#include "menu_type.h"
+
+#define MENU_TITLE_LEN 0x10
+
+typedef struct menu_node {
+    menu_id_t id;
+    menu_id_t parent;
+    menu_id_t child;
+    menu_id_t prev;
+    menu_id_t next;
+    const char *title;
+    menu_tree_type_t type;
+} menu_node_t;
+
+const menu_node_t *menu_tree_get_by_id(menu_context_t *ctx, menu_id_t id);
+
+menu_id_t menu_tree_get_next(menu_context_t *ctx, menu_id_t id);
+menu_id_t menu_tree_get_prev(menu_context_t *ctx, menu_id_t id);
+menu_id_t menu_tree_get_parent(menu_context_t *ctx, menu_id_t id);
+menu_id_t menu_tree_get_child(menu_context_t *ctx, menu_id_t id);
+const char *menu_tree_get_title(menu_context_t *ctx, menu_id_t id);
+menu_tree_type_t menu_tree_get_type(menu_context_t *ctx, menu_id_t id);
+
+#endif /* MENU_STRUCT_H */

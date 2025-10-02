@@ -1,6 +1,7 @@
-#include "menu_values.h"
+#include "menu_data_value.h"
+#include "menu_value.h"
 
-static menu_item_value_t s_values[] = {
+static menu_node_value_t s_menu_values[] = {
     // start fixed
     [MENU_ID_START] = {
         .id = MENU_ID_START,
@@ -91,8 +92,6 @@ static menu_item_value_t s_values[] = {
     },
 };
 
-menu_item_value_t *menu_get_value(menu_id_t id) {
-    if (id >= MENU_ID_COUNT)
-        return 0;
-    return &(s_values[MENU_ID_COUNT]);
+menu_node_value_t *menu_data_get_values(void) {
+    return s_menu_values;
 }

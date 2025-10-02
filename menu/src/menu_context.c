@@ -1,0 +1,88 @@
+#include "menu_context.h"
+#include "menu_tree.h"
+#include "menu_config.h"
+#include "menu_value.h"
+#include "menu_data_tree.h"
+#include "menu_data_config.h"
+#include "menu_data_name.h"
+#include "menu_data_value.h"
+#include "menu_data_context.h"
+
+void menu_context_init(menu_context_t *ctx) {
+
+    ctx->nodes = menu_data_get_tree();
+    ctx->configs = menu_data_get_config();
+    ctx->values = menu_data_get_values();
+    ctx->names = menu_data_get_node_names();
+    ctx->previous = MENU_ID_COUNT;
+    ctx->current = menu_data_get_first_id();
+    ctx->dirty = false;
+    ctx->update = false;
+    ctx->state = MENU_STATE_NAVIGATION;
+
+    menu_data_set_context(ctx);
+}
+
+bool menu_context_get_dirty(menu_context_t *ctx) {
+    return ctx->dirty;
+}
+
+void menu_context_set_dirty(menu_context_t *ctx) {
+    ctx->dirty = true;
+}
+
+void menu_context_reset_dirty(menu_context_t *ctx) {
+    ctx->dirty = false;
+}
+
+void menu_context_set_update(menu_context_t *ctx) {
+    ctx->update = true;
+}
+
+void menu_context_reset_update(menu_context_t *ctx) {
+    ctx->update = false;
+}
+
+bool menu_context_get_update(menu_context_t *ctx) {
+    return ctx->update;
+}
+
+char *menu_context_get_title_str(menu_context_t *ctx) {
+    return ctx->title_buf;
+}
+
+char *menu_context_get_value_str(menu_context_t *ctx) {
+    return ctx->value_buf;
+}
+
+char *menu_context_set_invalidate(menu_context_t *ctx, bool update) {
+    ctx->update = update;
+}
+
+const menu_node_t *menu_context_get_tree_nodes(menu_context_t *ctx) {
+    return ctx->nodes;
+}
+
+const menu_node_config_t *menu_context_get_config_nodes(menu_context_t *ctx) {
+    return ctx->configs;
+}
+
+menu_node_value_t *menu_context_get_value_nodes(menu_context_t *ctx) {
+    return ctx->values;
+}
+
+const menu_node_name_t *menu_context_get_name_nodes(menu_context_t *ctx) {
+    return ctx->names;
+}
+
+menu_state_t menu_context_get_state(menu_context_t *ctx) {
+    return ctx->state;
+}
+
+menu_id_t menu_context_get_current_id(menu_context_t *ctx) {
+    return ctx->current;
+}
+
+menu_id_t menu_context_get_previous_id(menu_context_t *ctx) {
+    return ctx->previous;
+}
