@@ -84,12 +84,12 @@ typedef struct menu_node_config {
 
 // Прототипы функций
 const menu_node_config_t *menu_config_get_by_id(menu_context_t *ctx, menu_id_t id);
-bool menu_config_handle_position_cb(menu_context_t *ctx, menu_id_t id, int8_t delta);
-bool menu_config_handle_click_cb(menu_context_t *ctx, menu_id_t id);
-bool menu_config_handle_double_click_cb(menu_context_t *ctx, menu_id_t id);
-bool menu_config_handle_long_click_cb(menu_context_t *ctx, menu_id_t id);
-bool menu_config_handle_draw_value_cb(menu_context_t *ctx, menu_id_t id);
-bool menu_config_handle_event_cb(menu_context_t *ctx, menu_id_t id, menu_event_t event);
+bool menu_config_call_position_cb(menu_context_t *ctx, menu_id_t id, int8_t delta);
+bool menu_config_call_click_cb(menu_context_t *ctx, menu_id_t id);
+bool menu_config_call_double_click_cb(menu_context_t *ctx, menu_id_t id);
+bool menu_config_call_long_click_cb(menu_context_t *ctx, menu_id_t id);
+bool menu_config_call_draw_value_cb(menu_context_t *ctx, menu_id_t id);
+bool menu_config_call_event_cb(menu_context_t *ctx, menu_id_t id, menu_event_t event);
 
 // string_fixed
 const char* menu_config_get_string_fixed_current(menu_context_t *ctx, menu_id_t id, uint8_t idx);

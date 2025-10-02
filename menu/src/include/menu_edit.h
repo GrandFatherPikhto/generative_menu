@@ -15,6 +15,7 @@ typedef struct menu_callback menu_callback_t;
 
 void string_fixed_click_cyclic_cb(menu_context_t *ctx, menu_id_t id);
 void string_fixed_position_cyclic_cb(menu_context_t *ctx, menu_id_t id, int8_t delta);
+void pwm_frequency_change_cb(menu_context_t *ctx, menu_id_t id, int8_t delta);
 void udword_factor_click_cyclic_factor_cb(menu_context_t *ctx, menu_id_t id);
 void udword_factor_position_limit_cb(menu_context_t *ctx, menu_id_t id, int8_t delta);
 void ubyte_simple_position_limit_cb(menu_context_t *ctx, menu_id_t id, int8_t delta);

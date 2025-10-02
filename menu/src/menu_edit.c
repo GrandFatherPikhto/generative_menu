@@ -18,10 +18,11 @@ void string_fixed_click_cyclic_cb(menu_context_t *ctx, menu_id_t id) {
        return; // Или установите idx в 0
     }
 
-    if (count - 1 > *idx)
+    if (count - 1 > *idx) {
         *idx = *idx + 1;
-    else
+    } else {
         *idx = 0;
+    }
 
     if (*idx != old_idx) {
         menu_context_set_dirty(ctx);
@@ -37,7 +38,7 @@ void string_fixed_position_cyclic_cb(menu_context_t *ctx, menu_id_t id, int8_t d
        return; // Или установите idx в 0
     }
     if (delta > 0) {
-        if (count - delta > *idx) {
+        if (delta + *idx < count) {
             *idx = *idx + delta;
         } else {
             *idx = 0;
@@ -45,7 +46,7 @@ void string_fixed_position_cyclic_cb(menu_context_t *ctx, menu_id_t id, int8_t d
     }
 
     if (delta < 0) {
-        if (count + delta > 0) {
+        if (*idx >= -delta) {
             *idx = *idx + delta;
         } else {
             *idx = count - 1;

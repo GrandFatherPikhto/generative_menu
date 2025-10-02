@@ -39,9 +39,9 @@ void menu_draw_string_fixed_value_cb(menu_context_t *ctx, menu_id_t id) {
     const char *value_str = menu_context_get_value_str(ctx);
     uint8_t *idx  = menu_value_get_string_fixed_idx(ctx, id);
     const char* value = menu_config_get_string_fixed_current(ctx, id, *idx);
-    int len = snprintf(NULL, 0, "(%u)%s", *idx, value);
-    snprintf((char *)value_str, LCD_STRING_LEN, "(%u)%s%*c",
-        *idx,
+    int len = snprintf(NULL, 0, "%u. %s", *idx + 1, value);
+    snprintf((char *)value_str, LCD_STRING_LEN, "%u. %s%*c",
+        *idx + 1,
         value,
         15 - len > 0 ? 15 - len : 0,
         menu_context_get_state(ctx) == MENU_STATE_EDIT ? '*' : '>'
