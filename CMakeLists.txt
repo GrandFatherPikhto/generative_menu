@@ -10,5 +10,4 @@ enable_testing()
 
 # Добавляем подпроекты
 add_subdirectory(menu)
-# add_subdirectory(work)
 add_subdirectory(main)
