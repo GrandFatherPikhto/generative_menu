@@ -97,7 +97,6 @@ uint8_t menu_config_get_string_fixed_count(menu_context_t *ctx, menu_id_t id);
 uint8_t menu_config_get_string_fixed_default_idx(menu_context_t *ctx, menu_id_t id);
 // callback_callback
 // udword_factor
-uint32_t menu_config_get_udword_factor_value(menu_context_t *ctx, menu_id_t id);
 uint32_t menu_config_get_udword_factor_min(menu_context_t *ctx, menu_id_t id);
 uint32_t menu_config_get_udword_factor_max(menu_context_t *ctx, menu_id_t id);
 uint32_t menu_config_get_udword_factor_default_value(menu_context_t *ctx, menu_id_t id);
